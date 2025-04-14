@@ -2,34 +2,40 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon Portfolio</title>
+    <title>Portfolio comme Lena</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav>
-        <a href="#travaux">Travaux</a>
-        <a href="#apropos">À propos</a>
-        <a href="#contact">Contact</a>
-    </nav>
+    <header>
+        <nav>
+            <a href="#work">WORK</a>
+            <a href="#about">ABOUT</a>
+        </nav>
+    </header>
 
-    <section id="travaux">
-        <h2>Mes projets</h2>
-        <div class="projet">
-            <img src="https://placehold.co/800x450" alt="Projet 1">
-            <h3>Nom du projet</h3>
-            <p>Description courte.</p>
+    <section id="work">
+        <div class="grid">
+            <!-- 9 cases projets exactement comme Lena -->
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
+            <div class="project"> <img src="https://placehold.co/600x400"> </div>
         </div>
     </section>
 
-    <section id="apropos">
-        <h2>À propos</h2>
-        <p>Quelques lignes sur toi.</p>
+    <section id="about">
+        <h2>About</h2>
+        <p>Présentation personnelle courte ici.</p>
     </section>
 
-    <section id="contact">
-        <h2>Contact</h2>
-        <p>Email : exemple@mail.com</p>
-    </section>
+    <footer>
+        <p>© Ton nom - 2024</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
