@@ -1,6 +1,10 @@
 document.querySelectorAll('nav a').forEach(link => {
-    link.addEventListener('click', e => {
+    link.addEventListener('click', function(e){
         e.preventDefault();
-        document.querySelector(link.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+        const target = document.querySelector(this.getAttribute('href'));
+        window.scrollTo({
+            top: target.offsetTop,
+            behavior: 'smooth'
+        });
     });
 });
