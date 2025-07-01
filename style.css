@@ -91,6 +91,40 @@ header {
   transform: scale(1.05);
 }
 
+/* === Projet avec icônes overlay === */
+.project-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+}
+.project-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.overlay-icons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.overlay-icons img {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 4px black);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.overlay-icons img:hover {
+  transform: scale(1.1);
+}
+.project-item:hover .overlay-icons {
+  opacity: 1;
+}
+
 /* === CONTACT === */
 #contact {
   padding: 60px 20px;
@@ -178,7 +212,6 @@ button:hover {
   z-index: 10000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
-
 .nav-floating .nav-link {
   color: white;
   text-decoration: none;
@@ -187,7 +220,6 @@ button:hover {
   border-radius: 25px;
   transition: background 0.3s ease;
 }
-
 .nav-floating .nav-link.active,
 .nav-floating .nav-link:hover {
   background: rgb(70, 15, 110);
@@ -209,11 +241,9 @@ button:hover {
   transition: left 0.6s ease;
   z-index: 9000;
 }
-
 #about-section.active {
   left: 0;
 }
-
 .about-content {
   text-align: center;
   padding: 20px;
@@ -222,17 +252,14 @@ button:hover {
   max-width: 600px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
-
 .about-content h2 {
   font-size: 2.8rem;
   margin-bottom: 20px;
 }
-
 .about-content p {
   font-size: 1.2rem;
   line-height: 1.6;
 }
-
 .btn-cv {
   display: inline-block;
   margin-top: 25px;
@@ -244,7 +271,6 @@ button:hover {
   border-radius: 5px;
   transition: background 0.3s ease;
 }
-
 .btn-cv:hover {
   background: #c359d6;
 }
@@ -289,23 +315,21 @@ button:hover {
   justify-content: center;
   perspective: 800px;
 }
-
 .btn-group-3d a {
   transform-style: preserve-3d;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
   will-change: transform;
 }
-
 .btn-group-3d a:hover {
   transform: translateZ(63px);
   box-shadow: 32 12px 24px rgba(0, 0, 0, 0.4);
 }
-
 .btn-group-3d .btn-linkedin img {
   width: 40px;
   height: 40px;
   border-radius: 8px;
   padding: -7px;
 }
+
 
 
