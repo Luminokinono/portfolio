@@ -101,6 +101,7 @@ header {
   width: 100%;
   height: auto;
   display: block;
+  transition: transform 0.3s ease; /* Ajouté pour zoom smooth */
 }
 .overlay-icons {
   position: absolute;
@@ -123,6 +124,10 @@ header {
 }
 .project-item:hover .overlay-icons {
   opacity: 1;
+}
+/* ✅ Correction ajoutée : effet flottement */
+.project-item:hover img {
+  transform: scale(1.05);
 }
 
 /* === CONTACT === */
@@ -330,6 +335,3 @@ button:hover {
   border-radius: 8px;
   padding: -7px;
 }
-
-
-
