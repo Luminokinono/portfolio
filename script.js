@@ -6,6 +6,12 @@ const meter=document.createElement('div');meter.className='slide-meter';meter.se
 const buttons=slides.map((_,index)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`Diapositive ${index+1}`);b.addEventListener('click',()=>{show(index);restart()});meter.append(b);return b});document.querySelector('header').append(meter);
 function show(index){current=index;slides.forEach((slide,i)=>{slide.classList.toggle('current',i===index);slide.setAttribute('aria-hidden',String(i!==index));slide.querySelectorAll('a').forEach(a=>a.tabIndex=i===index?0:-1);buttons[i].classList.toggle('active',i===index);buttons[i].setAttribute('aria-pressed',String(i===index))})}
 function restart(){clearInterval(timer);if(!reduced&&!document.hidden)timer=setInterval(()=>show((current+1)%slides.length),6500)}show(0);restart();document.addEventListener('visibilitychange',restart);document.querySelector('header').addEventListener('focusin',()=>clearInterval(timer));document.querySelector('header').addEventListener('focusout',restart);
+// Charger et décoder les images avant de lancer la transition.
+const preparedImages=['images/about.jpg','images/ma-photo.jpg'].map(src=>{
+ const image=new Image();image.decoding='async';image.src=src;
+ if(typeof image.decode==='function')image.decode().catch(()=>{});
+ return image;
+});
 const about=document.getElementById('about-section'),home=document.getElementById('nav-home'),navAbout=document.getElementById('nav-about');about.inert=true;navAbout.setAttribute('aria-expanded','false');navAbout.setAttribute('aria-controls','about-section');
 function toggle(open){about.classList.toggle('active',open);about.inert=!open;home.classList.toggle('active',!open);navAbout.classList.toggle('active',open);navAbout.setAttribute('aria-expanded',String(open));document.body.style.overflow=open?'hidden':''}
 navAbout.addEventListener('click',e=>{e.preventDefault();toggle(true)});home.addEventListener('click',e=>{e.preventDefault();toggle(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'){toggle(false);navAbout.focus()}});
