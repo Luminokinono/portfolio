@@ -1,150 +1,204 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Oumid Bilal – Portfolio</title>
-
-  <!-- Police Oswald -->
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;700&display=swap" rel="stylesheet" />
-
-  <!-- Ton CSS -->
-  <link rel="stylesheet" href="style.css?v=motion-20261001-fluid" />
-  <link rel="preload" as="image" href="images/about.jpg" fetchpriority="high" />
-  <link rel="preload" as="image" href="images/ma-photo.jpg" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Oumid Bilal – Portfolio</title>
+<meta name="description" content="Oumid Bilal, élève ingénieur généraliste à l'ECAM-EPMI. Projets, parcours et contact." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="preload" as="image" href="images/ma-photo.jpg" />
 </head>
 <body>
+<!-- Allumage -->
+<div class="loader" aria-hidden="true">
+  <div class="loader-row"><span class="loader-label">Allumage</span><span class="loader-count">000</span></div>
+  <div class="loader-bar"><i></i></div>
+</div>
 
-  <!-- NAVIGATION FLOTTANTE -->
-  <div class="nav-floating">
-    <a href="#" id="nav-home" class="nav-link active">Home</a>
-    <a href="#" id="nav-about" class="nav-link">À propos</a>
-  </div>
+<!-- Navigation -->
+<header class="nav">
+  <a href="#top" class="nav-brand" data-magnetic data-cursor="Haut"><span class="nav-mark">OB</span><span class="nav-name">Oumid Bilal</span></a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#about" data-magnetic>À propos</a>
+    <a href="#work" data-magnetic>Projets</a>
+    <a href="#contact" data-magnetic>Contact</a>
+  </nav>
+  <a href="CV-oumid.pdf" class="nav-cv" download="CV-Oumid-Bilal.pdf" data-magnetic data-cursor="PDF">CV <span aria-hidden="true">↓</span></a>
+  <div class="nav-progress" aria-hidden="true"><i></i></div>
+</header>
 
-  <!-- SLIDER -->
-  <header id="hero">
-    <div class="swiper">
-      <div class="swiper-wrapper">
-        <div class="swiper-slide" style="background-image: url('images/slide1.jpg')">
-          <div class="slide-content">
-            <h1>Bonjour</h1>
-            <p>Je suis Oumid Bilal, étudiant en 5ème année à l'ECAM EPMI, école d'ingénieur généraliste.</p>
-            <a href="#portfolio" class="scroll-down">↓</a>
-          </div>
-        </div>
-        <div class="swiper-slide" style="background-image: url('images/slide2.jpg')">
-          <div class="slide-content">
-            <h1>WELCOME</h1>
-            <p>Bienvenue dans mon portfolio.</p>
-            <a href="#portfolio" class="scroll-down">↓</a>
-          </div>
-        </div>
-        <div class="swiper-slide" style="background-image: url('images/slide3.jpg')">
-          <div class="slide-content">
-            <h1>Allez-y</h1>
-            <p>Faites défiler pour découvrir mes projets.</p>
-            <a href="#portfolio" class="scroll-down">↓</a>
-          </div>
-        </div>
+<main>
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <canvas class="hero-light" aria-hidden="true"></canvas>
+    <div class="hero-fallback" aria-hidden="true"></div>
+    <div class="hero-name" aria-roledescription="carrousel" aria-label="Accueil">
+      <div class="slide" aria-hidden="false">
+        <h1 class="hero-line" aria-label="Bonjour">BONJOUR</h1>
+        <p class="hero-sub">Je suis Oumid Bilal, étudiant en 5ème année à l'ECAM EPMI, école d'ingénieur généraliste.</p>
+      </div>
+      <div class="slide" aria-hidden="true">
+        <p class="hero-line" aria-label="Welcome">WELCOME</p>
+        <p class="hero-sub">Bienvenue dans mon portfolio.</p>
+      </div>
+      <div class="slide" aria-hidden="true">
+        <p class="hero-line" aria-label="Allez-y">ALLEZ-Y</p>
+        <p class="hero-sub">Faites défiler pour découvrir mes projets.</p>
       </div>
     </div>
-  </header>
-
-  <!-- PORTFOLIO -->
-  <section id="portfolio">
-    <h2>Mes Projets</h2>
-    <p class="section-description">Voici quelques-uns de mes projets récents.</p>
-    <div class="gallery">
-      <a href="https://github.com/Luminokinono/SnakeGame" target="_blank">
-        <img src="images/projet1.jpg" alt="Projet 1" />
-      </a>
-      <a href="https://github.com/Luminokinono/PacMan" target="_blank">
-        <img src="images/projet2.jpg" alt="Projet 2" />
-      </a>
-
-      <!-- Projet 3 modifié -->
-      <div class="project-item">
-        <img src="images/projet3.jpg" alt="Projet 3" />
-        <div class="overlay-icons">
-          <a href="https://github.com/Luminokinono/Shadow-Rush.git" target="_blank">
-            <img src="images/github-icon.png" alt="GitHub" />
-          </a>
-          <a href="https://www.youtube.com/watch?v=OZ7Y8M5zItY" target="_blank">
-            <img src="images/youtube-icon.png" alt="YouTube" />
-          </a>
+    <div class="hero-meta">
+      <div class="hero-pager">
+        <span class="hero-count mono"><strong>01</strong> / 03</span>
+        <div class="hero-bars">
+          <button type="button" aria-label="Diapositive 1 : Bonjour"><i></i></button>
+          <button type="button" aria-label="Diapositive 2 : Welcome"><i></i></button>
+          <button type="button" aria-label="Diapositive 3 : Allez-y"><i></i></button>
         </div>
       </div>
+      <p class="hero-status"><span class="dot-live" aria-hidden="true"></span>Recherche un stage de 6 mois · février 2027</p>
+      <a href="#about" class="hero-scroll mono" data-magnetic>Défiler <i aria-hidden="true"></i></a>
+    </div>
+  </section>
 
-      <!-- Projet 4 modifié -->
-      <div class="project-item">
-        <img src="images/projet4.jpg" alt="Projet 4" />
-        <div class="overlay-icons">
-          <a href="https://github.com/Luminokinono/App-SeniorConnect" target="_blank">
-            <img src="images/github-icon.png" alt="GitHub" />
-          </a>
-          <a href="https://www.youtube.com/watch?v=yMLC3Jjwxb0" target="_blank">
-            <img src="images/youtube-icon.png" alt="YouTube" />
-          </a>
-        </div>
+  <!-- À PROPOS -->
+  <section class="about" id="about">
+    <div class="about-photo" aria-hidden="true">
+      <img src="images/ma-photo.jpg" alt="" class="about-photo-base" />
+      <img src="images/ma-photo.jpg" alt="" class="about-photo-lit" />
+      <span class="about-photo-tag mono">Lumière · on</span>
+    </div>
+    <div class="about-body">
+      <p class="eyebrow mono">À propos</p>
+      <p class="manifesto">
+        Je m'appelle Oumid Bilal, je suis actuellement en cinquième année d'ingénieur à l'ECAM-EPMI. Je suis à la recherche d'un stage de 6 mois à partir de février 2027.
+      </p>
+      <dl class="facts">
+        <div><dt class="mono">École</dt><dd>ECAM-EPMI</dd></div>
+        <div><dt class="mono">Année</dt><dd>5<sup>e</sup></dd></div>
+        <div><dt class="mono">Stage</dt><dd>6 mois</dd></div>
+        <div><dt class="mono">Dès</dt><dd>Fév. 2027</dd></div>
+      </dl>
+      <div class="about-actions">
+        <a href="CV-oumid.pdf" class="btn btn-solid" download="CV-Oumid-Bilal.pdf" data-magnetic data-cursor="PDF">Télécharger mon CV</a>
+        <a href="https://www.linkedin.com/in/bilal-oumid-37995636b" class="btn btn-line" target="_blank" rel="noopener" data-magnetic>LinkedIn ↗</a>
       </div>
     </div>
   </section>
+
+  <!-- PROJETS -->
+  <section class="work" id="work" aria-label="Projets">
+    <div class="work-sticky">
+      <div class="work-ghost" aria-hidden="true">Projets</div>
+      <div class="work-track">
+        <div class="work-intro">
+          <p class="eyebrow mono">Projets</p>
+          <h2 class="work-title">Ce que j'ai construit</h2>
+          <p class="work-hint mono" aria-hidden="true">Faites défiler ou glissez <i></i></p>
+        </div>
+
+        <article class="card">
+          <div class="card-media"><img src="images/projet1.jpg" alt="Visuel du jeu Snake" draggable="false" /></div>
+          <div class="card-info">
+            <span class="card-n mono">01</span>
+            <h3>Snake Game</h3>
+            <p class="mono">C++ · SFML</p>
+            <div class="card-links"><a href="https://github.com/Luminokinono/SnakeGame" target="_blank" rel="noopener" class="ic ic-gh" aria-label="Code source sur GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-media"><img src="images/projet2.jpg" alt="Visuel du jeu Pac-Man" draggable="false" /></div>
+          <div class="card-info">
+            <span class="card-n mono">02</span>
+            <h3>Pac-Man</h3>
+            <p class="mono">Java · Swing</p>
+            <div class="card-links"><a href="https://github.com/Luminokinono/PacMan" target="_blank" rel="noopener" class="ic ic-gh" aria-label="Code source sur GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-media"><img src="images/projet3.jpg" alt="Visuel du jeu Shadow Rush" draggable="false" /></div>
+          <div class="card-info">
+            <span class="card-n mono">03</span>
+            <h3>Shadow Rush</h3>
+            <p class="mono">Godot · 2D</p>
+            <div class="card-links">
+              <a href="https://github.com/Luminokinono/Shadow-Rush" target="_blank" rel="noopener" class="ic ic-gh" aria-label="Code source sur GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+              <a href="https://www.youtube.com/watch?v=OZ7Y8M5zItY" target="_blank" rel="noopener" class="ic ic-yt" aria-label="Vidéo de démonstration sur YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8z"/><path class="yt-play" d="M9.6 15.6 15.8 12 9.6 8.4z"/></svg></a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-media"><img src="images/projet4.jpg" alt="Visuel de l'application SeniorConnect" draggable="false" /></div>
+          <div class="card-info">
+            <span class="card-n mono">04</span>
+            <h3>SeniorConnect</h3>
+            <p class="mono">PHP · Web</p>
+            <div class="card-links">
+              <a href="https://github.com/Luminokinono/App-SeniorConnect" target="_blank" rel="noopener" class="ic ic-gh" aria-label="Code source sur GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+              <a href="https://www.youtube.com/watch?v=yMLC3Jjwxb0" target="_blank" rel="noopener" class="ic ic-yt" aria-label="Vidéo de démonstration sur YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8z"/><path class="yt-play" d="M9.6 15.6 15.8 12 9.6 8.4z"/></svg></a>
+            </div>
+          </div>
+        </article>
+
+        <div class="work-outro">
+          <p class="mono">Tous mes dépôts</p>
+          <a href="https://github.com/Luminokinono" target="_blank" rel="noopener" data-magnetic>GitHub →</a>
+        </div>
+      </div>
+      <div class="work-hud" aria-hidden="true">
+        <span class="mono"><strong class="work-current">01</strong> / 04</span>
+        <div class="work-bar"><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <div class="band" aria-label="Technologies utilisées : C++, SFML, Java, Swing, Godot, PHP">
+    <div class="band-track" aria-hidden="true">
+      <span>C++</span><b>✦</b><span class="o">SFML</span><b>✦</b><span>Java</span><b>✦</b><span class="o">Swing</span><b>✦</b><span>Godot</span><b>✦</b><span class="o">PHP</span><b>✦</b>
+      <span>C++</span><b>✦</b><span class="o">SFML</span><b>✦</b><span>Java</span><b>✦</b><span class="o">Swing</span><b>✦</b><span>Godot</span><b>✦</b><span class="o">PHP</span><b>✦</b>
+    </div>
+  </div>
 
   <!-- CONTACT -->
-  <section id="contact">
-    <h2>Envie de me contacter ?</h2>
-    <div class="contact-info">
-      <p>Vous pouvez me joindre ici.</p>
-      <p><strong>Email :</strong> bilaloumidxv3@gmail.com</p>
-      <p><strong>Téléphone :</strong> 07 82 23 42 12</p>
+  <section class="contact" id="contact">
+    <p class="eyebrow mono">Contact</p>
+    <h2 class="contact-title"><span>Un stage, un projet, une idée ?</span> <em>Parlons-en.</em></h2>
+    <div class="contact-grid">
+      <ul class="contact-list">
+        <li>
+          <span class="mono">Email</span>
+          <span class="contact-value"><span class="email-text">bilaloumidxv3@gmail.com</span>
+            <button type="button" class="copy" data-copy="bilaloumidxv3@gmail.com" data-cursor="Copier">Copier</button></span>
+        </li>
+        <li><span class="mono">Téléphone</span><span class="contact-value">07 82 23 42 12</span></li>
+        <li><span class="mono">LinkedIn</span><a class="contact-value" href="https://www.linkedin.com/in/bilal-oumid-37995636b" target="_blank" rel="noopener">Bilal Oumid ↗</a></li>
+        <li><span class="mono">CV</span><a class="contact-value" href="CV-oumid.pdf" download="CV-Oumid-Bilal.pdf">Télécharger le PDF ↓</a></li>
+      </ul>
+      <form class="contact-form" action="https://formspree.io/f/xovkljoz" method="POST">
+        <div class="field"><input type="text" id="name" name="name" placeholder=" " required /><label for="name">Nom</label></div>
+        <div class="field"><input type="email" id="email" name="_replyto" placeholder=" " required /><label for="email">Email</label></div>
+        <div class="field"><textarea id="message" name="message" rows="4" placeholder=" " required></textarea><label for="message">Message</label></div>
+        <button type="submit" class="btn btn-solid btn-send" data-magnetic>Envoyer le message</button>
+        <p class="form-status mono" role="status"></p>
+      </form>
     </div>
-
-    <!-- Formulaire fonctionnel Formspree -->
-    <form action="https://formspree.io/f/xovkljoz" method="POST">
-      <div class="form-group">
-        <label for="name">Nom :</label>
-        <input type="text" id="name" name="name" placeholder="Votre nom" required />
-      </div>
-      <div class="form-group">
-        <label for="email">Email :</label>
-        <input type="email" id="email" name="_replyto" placeholder="Votre email" required />
-      </div>
-      <div class="form-group">
-        <label for="message">Message :</label>
-        <textarea id="message" name="message" rows="5" placeholder="Votre message" required></textarea>
-      </div>
-      <button type="submit">Envoyer</button>
-    </form>
   </section>
+</main>
 
-  <!-- SECTION À PROPOS HORIZONTALE -->
-  <div id="about-section">
-    <section class="about-content">
-      <div class="about-card">
-        <img src="images/ma-photo.jpg" alt="Oumid Bilal" class="about-photo tilt-3d" />
-        <div class="about-text">
-          <h2>À propos de moi</h2>
-          <p>Je m'appelle Oumid Bilal, je suis actuellement en cinquième année d'ingénieur à l’ECAM-EPMI. Je suis à la recherche d’un stage de 6 mois à partir de février 2027.</p>
-          <div class="btn-group-3d">
-            <a href="CV-oumid.pdf" class="btn-cv tilt-3d" download="CV-Oumid-Bilal.pdf">Télécharger mon CV</a>
-            <a href="https://www.linkedin.com/in/bilal-oumid-37995636b" class="btn-linkedin" target="_blank">
-              <img src="images/linkedin.png" alt="LinkedIn" class="linkedin-icon tilt-3d" />
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
+<footer class="footer">
+  <span class="mono">© 2026 Oumid Bilal</span>
+  <span class="mono">Île-de-France · <time class="clock">--:--</time></span>
+  <a href="#top" class="mono" data-magnetic>Haut de page ↑</a>
+</footer>
 
-  <!-- BULLE DE NAVIGATION -->
-  <div class="dot-nav">
-    <a href="#hero" class="dot"></a>
-    <a href="#portfolio" class="dot"></a>
-    <a href="#contact" class="dot active"></a>
-  </div>
+<div class="grain" aria-hidden="true"></div>
 
-  <script src="script.js?v=motion-20261001-fluid"></script>
-
-<script src="cinematic.js?v=motion-20261001-fluid"></script></body>
+<script src="main.js"></script>
+</body>
 </html>
-
