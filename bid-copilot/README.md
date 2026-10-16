@@ -34,7 +34,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 ## Le DCE de démonstration
 
-`data/dce_demo_datacenter.md` est un faux dossier de consultation pour le raccordement en 225 kV d'un data center. Il contient volontairement des pièges que l'outil doit détecter :
+`data/dce_demo_datacenter.txt` est un faux dossier de consultation pour le raccordement en 225 kV d'un data center. Il contient volontairement des pièges que l'outil doit détecter :
 
 - un délai de 18 mois, incompatible avec la fabrication d'un transformateur (24 à 30 mois) ;
 - des pénalités de retard de 0,5 % par jour, sans plafond ;
