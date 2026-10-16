@@ -236,6 +236,20 @@ a.contact-value:hover{color:var(--violet)}
 @keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-6%,-2%)}80%{transform:translate(5%,4%)}}
 
 /* ---------- Mobile ---------- */
+/* ---------- Projet mis en avant : Bid Copilot ---------- */
+.card-featured{border-color:#19c3ff55}
+.card-featured .card-n{color:#19c3ff}
+.ic-app::before,.ic-play::before{background:#19c3ff}
+.ic-app:hover,.ic-app:focus-visible,.ic-play:hover,.ic-play:focus-visible{color:var(--ink)}
+.ic-app:hover svg{transform:translate(2px,-2px)}
+.ic-play{background:none;cursor:pointer;font:inherit}
+.ic-play:hover svg{transform:scale(1.15)}
+.video-modal{margin:auto;padding:0;border:none;background:transparent;width:min(1100px,92vw,calc(80vh*16/9));overflow:visible}
+.video-modal::backdrop{background:#07060be6;backdrop-filter:blur(6px)}
+.video-modal video{display:block;width:100%;aspect-ratio:16/9;object-fit:contain;border-radius:12px;box-shadow:0 40px 120px #000;background:#000}
+.video-close{position:absolute;top:-52px;right:0;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--ink-2);color:var(--paper);font-size:26px;line-height:1;cursor:pointer}
+.video-close:hover{border-color:var(--paper)}
+
 @media (max-width:820px){
   .nav-links{display:none}
   .nav-cv{margin-left:auto}
