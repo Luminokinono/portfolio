@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bid Copilot</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.9.2/build/stlite.css" />
+  <style>
+    body { margin: 0; background: #fff; font-family: system-ui, sans-serif; }
+    #loading { padding: 48px 24px; text-align: center; color: #0b1f3a; }
+    #loading p { color: #555f6b; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div id="loading">
+      <h2>⚡ Bid Copilot</h2>
+      <p>Chargement de l'application dans votre navigateur (30 à 60 s au premier lancement)…</p>
+    </div>
+  </div>
+  <script type="module">
+    import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.9.2/build/stlite.js";
+
+    const files = [
+      "app.py",
+      "core/__init__.py",
+      "core/estimator.py",
+      "core/ai_analyst.py",
+      "core/risk_deck.py",
+      "data/__init__.py",
+      "data/generate_dataset.py",
+      "data/projects.csv",
+      "data/dce_demo_datacenter.md",
+    ];
+
+    mount(
+      {
+        requirements: ["plotly", "python-pptx", "pypdf", "pydantic"],
+        entrypoint: "app.py",
+        files: Object.fromEntries(files.map((f) => [f, { url: `./${f}` }])),
+      },
+      document.getElementById("root"),
+    );
+  </script>
+</body>
+</html>

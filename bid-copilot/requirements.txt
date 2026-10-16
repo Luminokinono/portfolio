@@ -1,0 +1,8 @@
+streamlit>=1.40
+pandas
+numpy
+plotly
+python-pptx
+pypdf
+pydantic>=2
+anthropic>=1.0
