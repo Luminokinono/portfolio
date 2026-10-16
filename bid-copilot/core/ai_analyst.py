@@ -97,7 +97,7 @@ def _strict_schema(schema: dict) -> dict:
 
 def _find(pattern: str, text: str) -> str | None:
     m = re.search(pattern, text, re.IGNORECASE)
-    return m.group(0).strip() if m else None
+    return m.group(0).strip(" -•*#:") if m else None
 
 
 def _num(pattern: str, text: str, cast=float, default=0):
@@ -105,10 +105,22 @@ def _num(pattern: str, text: str, cast=float, default=0):
     return cast(m.group(1).replace(",", ".")) if m else default
 
 
+def _type_projet(dce: str) -> str:
+    t = dce.lower()
+    if "data center" in t:
+        return "Poste de raccordement data center"
+    if re.search(r"solaire|photovolta|éolien", t):
+        return "Raccordement EnR (solaire/éolien)"
+    if "400 kv" in t or "interconnexion" in t:
+        return "Interconnexion / poste 400 kV"
+    return "Poste source / extension"
+
+
 def analyse_offline(dce: str) -> Analyse:
+    dce = re.sub(r"\s+", " ", dce)  # les PDF coupent les phrases en fin de ligne
     kv = _num(r"(\d{2,3})\s*/\s*\d+\s*kV", dce, int) or _num(r"(\d{2,3})\s*kV", dce, int)
     travees = _num(r"(\d+)\s*travées", dce, int)
-    n_tr = _num(r"(\d+)\s*transformateurs", dce, int, 1)
+    n_tr = _num(r"(\d+)\s*transformateurs?\b", dce, int, 1)
     mva_unit = _num(r"(\d+)\s*MVA", dce, int)
     mva_total = _num(r"soit\s*(\d+)\s*MVA", dce, int, n_tr * mva_unit)
     km = _num(r"(\d+(?:[.,]\d+)?)\s*km", dce)
@@ -123,27 +135,33 @@ def analyse_offline(dce: str) -> Analyse:
             extrait_dce=_find(r"[^.]*\d+\s*mois\*?\*?\s*après la notification[^.]*", dce) or "",
             mitigation="Proposer un planning à 28-30 mois ou un transformateur provisoire ; réserver un créneau usine dès la remise de l'offre."))
         hyp.append("Planning basé sur un délai de fabrication transformateur de 26 mois à compter de la commande.")
-    pen = _find(r"[^.\n]*pénalités[^.\n]*par jour[^.\n]*", dce)
-    if pen and not re.search(r"plafon", dce, re.IGNORECASE):
+        questions.append(f"Le délai de {delai} mois peut-il être recalé sur un délai réaliste de fabrication transformateur ?")
+    pen = _find(r"[^.]*pénalités[^.]*par jour[^.]*", dce)
+    pen_bloc = _find(r"pénalités[^.]*\.", dce) or ""
+    if pen and not re.search(r"plafon|limitées à|dans la limite", pen_bloc, re.IGNORECASE):
         risques.append(Risque(titre="Pénalités de retard non plafonnées", categorie="Contractuel", gravite="Critique",
                               extrait_dce=pen, mitigation="Demander un plafond global à 10 % du montant du marché."))
         questions.append("Les pénalités de retard peuvent-elles être plafonnées à 10 % du montant du marché ?")
     if re.search(r"fermes et non révisables|aucune\.?\s*les prix", dce, re.IGNORECASE):
-        risques.append(Risque(titre="Prix fermes et non révisables sur plus de 18 mois", categorie="Financier", gravite="Élevée",
-                              extrait_dce=_find(r"[^\n]*non révisables[^\n]*", dce) or "",
+        risques.append(Risque(titre=f"Prix fermes et non révisables sur {delai or 'plus de 18'} mois", categorie="Financier", gravite="Élevée",
+                              extrait_dce=_find(r"[^.]*non révisables[^.]*", dce) or "",
                               mitigation="Indexer les câbles sur le LME cuivre ou figer les prix fournisseurs à la commande."))
-    if re.search(r"études de sol[^.]*si nécessaire", dce, re.IGNORECASE):
+    sol = r"(études? de sols?|études? géotechniques?)[^.]*(si nécessaire|à la charge du titulaire|non fournie|pas été réalisée)"
+    if re.search(sol, dce, re.IGNORECASE):
         risques.append(Risque(titre="Aucune étude géotechnique fournie", categorie="Technique", gravite="Élevée",
-                              extrait_dce=_find(r"[^.]*études de sol[^.]*", dce) or "",
+                              extrait_dce=_find(r"[^.]*" + sol + r"[^.]*", dce) or "",
                               mitigation="Chiffrer sur hypothèse de sol standard ; fondations spéciales en option."))
         manquantes.append("Étude géotechnique (G2 AVP) du terrain du poste")
+        questions.append("Une étude géotechnique (même partielle) est-elle disponible pour le terrain du poste ?")
         hyp.append("Sol de portance standard, sans fondations profondes ni pollution.")
         excl.append("Fondations spéciales, dépollution et rabattement de nappe")
-    if re.search(r"tracé[^.]*(à confirmer|reste)", dce, re.IGNORECASE):
+    trace = r"tracé[^.]*(à confirmer|reste|non arrêté|pressenti)"
+    if re.search(trace, dce, re.IGNORECASE):
         risques.append(Risque(titre="Tracé de la liaison souterraine non figé", categorie="Technique", gravite="Élevée",
-                              extrait_dce=_find(r"[^.]*tracé définitif[^.]*", dce) or "",
+                              extrait_dce=_find(r"[^.]*" + trace + r"[^.]*", dce) or "",
                               mitigation="Prix au mètre linéaire au-delà de la longueur de référence."))
         manquantes.append("Tracé définitif de la liaison et longueur exacte")
+        questions.append("À quelle date le tracé définitif de la liaison sera-t-il arrêté ?")
         hyp.append(f"Longueur de liaison de {km} km ; variation facturée au mètre linéaire.")
     if re.search(r"autorisations[^.]*en cours", dce, re.IGNORECASE):
         risques.append(Risque(titre="Autorisations administratives non obtenues", categorie="Administratif", gravite="Élevée",
@@ -163,10 +181,20 @@ def analyse_offline(dce: str) -> Analyse:
         risques.append(Risque(titre="Garantie de disponibilité de 99,99 % sur 24 mois", categorie="Contractuel", gravite="Moyenne",
                               extrait_dce=_find(r"[^.\n]*99[,.]99[^.\n]*", dce) or "",
                               mitigation="Limiter la garantie au périmètre du titulaire et définir les cas exclus."))
+    if re.search(r"Natura 2000|zone humide|espèces protégées", dce, re.IGNORECASE):
+        risques.append(Risque(titre="Contraintes environnementales sur le tracé", categorie="Administratif", gravite="Élevée",
+                              extrait_dce=_find(r"[^.]*(Natura 2000|zone humide|espèces protégées)[^.]*", dce) or "",
+                              mitigation="Prévoir un écologue, des fenêtres de travaux hors nidification et un forage dirigé en option."))
+        hyp.append("Travaux en zone sensible réalisés hors période de nidification (septembre à février).")
+        excl.append("Mesures compensatoires environnementales et suivi écologique post-travaux")
+        questions.append("Les prescriptions environnementales (périodes de travaux, forage dirigé) sont-elles déjà connues ?")
+    if re.search(r"garantie à première demande", dce, re.IGNORECASE):
+        risques.append(Risque(titre="Garantie à première demande exigée", categorie="Financier", gravite="Moyenne",
+                              extrait_dce=_find(r"[^.]*garantie à première demande[^.]*", dce) or "",
+                              mitigation="Négocier une caution bancaire classique ou réduire le montant garanti."))
     if re.search(r"extension future", dce, re.IGNORECASE):
         manquantes.append("Périmètre exact des réservations pour l'extension à 4 transformateurs")
         questions.append("Quelles réservations sont attendues pour l'extension future (génie civil seul, ou travées équipées) ?")
-    questions.append("Le délai de 18 mois peut-il être recalé sur un délai réaliste de fabrication transformateur ?")
     excl += ["Travaux dans le poste RTE existant", "Frais de raccordement facturés par le gestionnaire de réseau"]
 
     critiques = sum(r.gravite == "Critique" for r in risques)
@@ -176,8 +204,9 @@ def analyse_offline(dce: str) -> Analyse:
 
     return Analyse(
         resume=f"Poste {kv} kV de {travees} travées, {mva_total} MVA, liaison souterraine de {km} km, "
-               f"délai exigé de {delai} mois. Contrat clé en main à prix ferme.",
-        type_projet="Poste de raccordement data center" if "data center" in dce.lower() else "Poste source / extension",
+               + (f"délai exigé de {delai} mois. " if delai else "délai non précisé. ")
+               + ("Contrat à prix ferme et non révisable." if re.search(r"non révisables", dce, re.I) else "Prix révisables."),
+        type_projet=_type_projet(dce),
         tension_kv=kv, nb_travees=travees, puissance_mva=mva_total, km_cable=km, pays="France",
         delai_exige_mois=delai, risques=risques, donnees_manquantes=manquantes,
         hypotheses_proposees=hyp, exclusions_proposees=excl, questions_au_client=questions,
