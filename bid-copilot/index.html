@@ -21,23 +21,27 @@
   <script type="module">
     import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.9.2/build/stlite.js";
 
+    // Les fichiers commençant par "_" ne sont pas servis par GitHub Pages (Jekyll) :
+    // les __init__.py, vides, sont donc passés directement en contenu.
     const files = [
       "app.py",
-      "core/__init__.py",
       "core/estimator.py",
       "core/ai_analyst.py",
       "core/risk_deck.py",
-      "data/__init__.py",
       "data/generate_dataset.py",
       "data/projects.csv",
-      "data/dce_demo_datacenter.md",
+      "data/dce_demo_datacenter.txt",
     ];
 
     mount(
       {
         requirements: ["plotly", "python-pptx", "pypdf", "pydantic"],
         entrypoint: "app.py",
-        files: Object.fromEntries(files.map((f) => [f, { url: `./${f}` }])),
+        files: {
+          ...Object.fromEntries(files.map((f) => [f, { url: `./${f}` }])),
+          "core/__init__.py": "",
+          "data/__init__.py": "",
+        },
       },
       document.getElementById("root"),
     );

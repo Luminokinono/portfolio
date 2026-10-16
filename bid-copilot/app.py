@@ -44,7 +44,7 @@ with tab_ao:
         else:
             dce = up.read().decode("utf-8")
     else:
-        dce = (ROOT / "data" / "dce_demo_datacenter.md").read_text(encoding="utf-8")
+        dce = (ROOT / "data" / "dce_demo_datacenter.txt").read_text(encoding="utf-8")
         st.info("Aucun fichier déposé : utilisation du DCE de démonstration (raccordement 225 kV d'un data center).")
     with st.expander("Voir le DCE"):
         st.markdown(dce)
