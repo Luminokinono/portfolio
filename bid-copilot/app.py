@@ -36,26 +36,38 @@ tab_ao, tab_cost, tab_risk, tab_deck, tab_data = st.tabs(
 # --- 1. Analyse de l'appel d'offres ------------------------------------------
 with tab_ao:
     st.subheader("Analyse automatique du dossier de consultation")
-    up = st.file_uploader("Déposer un DCE (.md, .txt ou .pdf)", type=["md", "txt", "pdf"])
-    if up is not None:
-        if up.name.endswith(".pdf"):
-            from pypdf import PdfReader
-            dce = "\n".join(p.extract_text() or "" for p in PdfReader(up).pages)
-        else:
-            dce = up.read().decode("utf-8")
+    api_key = st.text_input(
+        "Clé API Anthropic (optionnelle)", type="password",
+        help="Avec une clé, l'IA lit le dossier et l'analyse quel qu'il soit. Sans clé, l'outil utilise "
+             "des règles par mots-clés, limitées aux cas prévus. La clé reste dans votre navigateur.")
+    ups = st.file_uploader("Déposer les pièces du DCE (RC, CCAP, CCTP… en .pdf, .txt ou .md)",
+                           type=["md", "txt", "pdf"], accept_multiple_files=True)
+    if ups:
+        from pypdf import PdfReader
+        pieces = []
+        for up in ups:
+            if up.name.lower().endswith(".pdf"):
+                txt = "\n".join(p.extract_text() or "" for p in PdfReader(up).pages)
+            else:
+                txt = up.read().decode("utf-8", errors="replace")
+            pieces.append(f"===== PIÈCE : {up.name} =====\n{txt}")
+        dce = "\n\n".join(pieces)
+        if len(dce.strip()) < 200 * len(ups):
+            st.warning("Peu de texte extrait : un PDF scanné (image) ne peut pas être lu sans OCR.")
     else:
         dce = (ROOT / "data" / "dce_demo_datacenter.txt").read_text(encoding="utf-8")
         st.info("Aucun fichier déposé : utilisation du DCE de démonstration (raccordement 225 kV d'un data center).")
-    with st.expander("Voir le DCE"):
-        st.markdown(dce)
+    with st.expander(f"Voir le texte du DCE ({len(dce):,} caractères)".replace(",", " ")):
+        st.text(dce[:20000] + ("\n[…]" if len(dce) > 20000 else ""))
 
     if st.button("🔍 Analyser le DCE", type="primary") or "analyse" in st.session_state:
-        if "analyse" not in st.session_state or st.session_state.get("dce") != dce:
-            with st.spinner("Analyse en cours…"):
-                st.session_state.analyse, st.session_state.mode = ai_analyst.analyse(dce)
-                st.session_state.dce = dce
+        cle = (dce, api_key)
+        if "analyse" not in st.session_state or st.session_state.get("cle") != cle:
+            with st.spinner("Analyse en cours… (30 s à 2 min avec l'IA)" if api_key else "Analyse en cours…"):
+                st.session_state.analyse, st.session_state.mode = ai_analyst.analyse(dce, api_key or None)
+                st.session_state.cle = cle
         a = st.session_state.analyse
-        st.caption(f"Mode d'analyse : {st.session_state.mode}")
+        (st.caption if st.session_state.mode.startswith("IA") else st.warning)(f"Mode d'analyse : {st.session_state.mode}")
         st.success(a.resume)
         st.markdown(f"**Recommandation :** {a.recommandation_go_nogo}")
 
@@ -70,6 +82,7 @@ with tab_ao:
         c1.markdown("#### Questions au client"); c1.markdown("\n".join(f"- {x}" for x in a.questions_au_client))
         c2.markdown("#### Hypothèses proposées"); c2.markdown("\n".join(f"- {x}" for x in a.hypotheses_proposees))
         c2.markdown("#### Exclusions proposées"); c2.markdown("\n".join(f"- {x}" for x in a.exclusions_proposees))
+        c2.markdown("#### Opportunités"); c2.markdown("\n".join(f"- {x}" for x in a.opportunites))
 
 # --- Paramètres du projet (pré-remplis par l'analyse) -------------------------
 a = st.session_state.get("analyse")
@@ -78,12 +91,15 @@ with st.sidebar:
     st.caption("Pré-rempli par l'analyse du DCE, modifiable.")
     types = sorted(df["type_projet"].unique())
     ptype = st.selectbox("Type", types, index=types.index(a.type_projet) if a and a.type_projet in types else 0)
-    pays = st.selectbox("Pays", list(E.PAYS_COEF), index=0)
+    pays_list = list(E.PAYS_COEF)
+    pays = st.selectbox("Pays", pays_list, index=pays_list.index(a.pays) if a and a.pays in pays_list else 0)
     tensions = sorted(df["tension_kv"].unique().tolist())
-    kv = st.selectbox("Tension (kV)", tensions, index=tensions.index(a.tension_kv) if a and a.tension_kv in tensions else 0)
-    trav = st.number_input("Nombre de travées", 1, 20, a.nb_travees if a else 6)
-    mva = st.number_input("Puissance transformateurs (MVA)", 0, 1000, a.puissance_mva if a else 240, step=10)
-    km = st.number_input("Longueur de câble (km)", 0.0, 50.0, float(a.km_cable) if a else 4.5, step=0.5)
+    # Tension de référence la plus proche de celle du dossier
+    kv_idx = min(range(len(tensions)), key=lambda i: abs(tensions[i] - a.tension_kv)) if a and a.tension_kv else 0
+    kv = st.selectbox("Tension (kV)", tensions, index=kv_idx)
+    trav = st.number_input("Nombre de travées", 1, 40, min(max(a.nb_travees, 1), 40) if a else 6)
+    mva = st.number_input("Puissance transformateurs (MVA)", 0, 3000, min(max(a.puissance_mva, 0), 3000) if a else 240, step=10)
+    km = st.number_input("Longueur de câble (km)", 0.0, 300.0, min(max(float(a.km_cable), 0.0), 300.0) if a else 4.5, step=0.5)
     marge = st.slider("Marge visée (%)", 5, 20, 10)
 
 proj = E.ProjectInput(ptype, pays, int(kv), int(trav), int(mva), float(km))
@@ -160,7 +176,8 @@ with tab_deck:
         client = st.text_input("Client", "Hyperion Data Campus (fictif)")
         remise = st.text_input("Date de remise", "15 mars 2027")
         if st.button("📊 Générer le .pptx", type="primary"):
-            pptx = build_deck(dict(nom=f"Offre {ptype} {kv} kV", client=client, date_remise=remise),
+            pptx = build_deck(dict(nom=f"Offre {ptype} {kv} kV", client=client, date_remise=remise,
+                                   opportunites=a.opportunites),
                               a, est, stats, sims, phases, sim, marge)
             st.download_button("⬇️ Télécharger la présentation", pptx, "comite_de_risque.pptx",
                                "application/vnd.openxmlformats-officedocument.presentationml.presentation")

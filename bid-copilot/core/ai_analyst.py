@@ -1,76 +1,146 @@
 """Analyse d'un dossier de consultation (DCE).
 
 Deux modes :
-- Claude (si ANTHROPIC_API_KEY est défini) : extraction structurée en JSON ;
+- Claude (avec une clé API) : lecture du dossier par l'IA et extraction structurée
+  en JSON. Fonctionne sur n'importe quel dossier, en local comme dans le navigateur ;
 - hors-ligne : règles par mots-clés, pour que la démo marche sans clé ni réseau.
 """
 import json
 import os
 import re
+import sys
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 MODEL = "claude-opus-5-5"
+API_URL = "https://api.anthropic.com/v1/messages"
+FALLBACK_BETA = "server-side-fallback-2026-07-01"
+MAX_CHARS = 2_000_000  # ~500 000 tokens, largement sous la fenêtre de contexte
+
+TYPES_PROJET = (
+    "Poste de raccordement data center",
+    "Poste source / extension",
+    "Raccordement EnR (solaire/éolien)",
+    "Liaison souterraine HTB",
+    "Interconnexion / poste 400 kV",
+    "Électrification site industriel",
+)
 
 
 class Risque(BaseModel):
     titre: str
     categorie: Literal["Planning", "Contractuel", "Technique", "Financier", "Interfaces", "Administratif"]
     gravite: Literal["Critique", "Élevée", "Moyenne", "Faible"]
-    extrait_dce: str = Field(description="Citation courte du DCE qui justifie le risque")
+    extrait_dce: str = Field(description="Citation courte et exacte du DCE qui justifie le risque")
     mitigation: str
 
 
 class Analyse(BaseModel):
     resume: str
-    type_projet: str
-    tension_kv: int
-    nb_travees: int
-    puissance_mva: int
-    km_cable: float
+    type_projet: Literal[TYPES_PROJET]  # type: ignore[valid-type]
+    tension_kv: int = Field(description="Tension la plus élevée des ouvrages, en kV ; 0 si absente")
+    nb_travees: int = Field(description="Nombre de travées HTB du poste ; 0 si absent")
+    puissance_mva: int = Field(description="Puissance totale de transformation installée, en MVA ; 0 si absente")
+    km_cable: float = Field(description="Longueur totale de liaison à construire, en km ; 0 si absente")
     pays: str
-    delai_exige_mois: int
+    delai_exige_mois: int = Field(description="Délai de mise en service exigé, en mois après notification ; 0 si absent")
     risques: list[Risque]
     donnees_manquantes: list[str]
     hypotheses_proposees: list[str]
     exclusions_proposees: list[str]
     questions_au_client: list[str]
-    recommandation_go_nogo: str
+    opportunites: list[str] = Field(description="Opportunités commerciales ou techniques pour le titulaire")
+    recommandation_go_nogo: str = Field(description="Commence par GO, GO SOUS CONDITIONS ou NO GO, puis une phrase de justification")
 
 
 SYSTEM = """Tu es ingénieur d'offres senior dans une entreprise de travaux électriques HTB \
-(postes, liaisons souterraines, raccordements). Tu analyses un dossier de consultation pour \
-préparer le Comité de Risque. Sois factuel : chaque risque doit citer un extrait du DCE. \
-Repère en priorité : incohérences de planning (délais fournisseurs transformateurs de 24 à \
-30 mois), pénalités non plafonnées, prix fermes sur longue durée, données d'entrée manquantes \
-(sol, tracé, autorisations), transferts de responsabilité vers le titulaire. \
-Les montants et quantités doivent venir du document ; s'ils sont absents, mets 0. \
+(postes, liaisons souterraines et aériennes, raccordements). Tu analyses un dossier de \
+consultation, qui peut comporter plusieurs pièces (règlement de consultation, CCAP, CCTP, \
+bordereau de prix…), pour préparer le Comité de Risque qui décidera de répondre ou non.
+
+Sois factuel : chaque risque cite un extrait exact du dossier. Classe la gravité selon \
+l'impact potentiel sur la marge et le délai. Regarde en particulier :
+- le planning, comparé aux délais réels des fournisseurs (transformateurs de puissance : \
+24 à 30 mois ; appareillage HTB : 12 à 18 mois) ;
+- les pénalités (plafond, assiette, cumul), les garanties, la révision des prix ;
+- les données d'entrée manquantes (sol, tracé, autorisations, interfaces) ;
+- les transferts de responsabilité vers le titulaire et les exigences de performance.
+
+Ne signale pas une clause bien encadrée (pénalités plafonnées, prix révisables…) comme un \
+risque. Les quantités viennent du document ; si une donnée est absente, mets 0. \
 Réponds en français."""
 
 
-def analyse_with_claude(dce_text: str) -> Analyse:
-    import anthropic  # noqa: PLC0415
-
-    client = anthropic.Anthropic()
-    response = client.beta.messages.create(
-        model=MODEL,
-        max_tokens=16000,
-        system=SYSTEM,
-        thinking={"type": "adaptive"},
-        output_config={
-            "effort": "high",
+def _request(dce_text: str) -> dict:
+    return {
+        "model": MODEL,
+        "max_tokens": 16000,
+        "system": SYSTEM,
+        "thinking": {"type": "adaptive"},
+        "output_config": {
+            "effort": "medium",
             "format": {"type": "json_schema", "schema": _strict_schema(Analyse.model_json_schema())},
         },
-        # Si le modèle refuse la requête, l'API bascule automatiquement sur un modèle de repli.
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        messages=[{"role": "user", "content": f"Analyse ce dossier de consultation :\n\n<dce>\n{dce_text}\n</dce>"}],
-    )
-    if response.stop_reason == "refusal":
+        # Si le modèle refuse la requête, l'API la relance sur un modèle de repli.
+        "fallbacks": "default",
+        "messages": [{"role": "user", "content": f"Analyse ce dossier de consultation :\n\n<dce>\n{dce_text}\n</dce>"}],
+    }
+
+
+def _post_from_browser(body: dict, api_key: str, fallback: bool) -> dict:
+    """Appel HTTP depuis le navigateur (stlite/Pyodide), où le SDK Python ne peut pas tourner.
+
+    Le code Python de stlite s'exécute dans un web worker, où une requête synchrone est permise.
+    """
+    from js import XMLHttpRequest  # noqa: PLC0415
+
+    xhr = XMLHttpRequest.new()
+    xhr.open("POST", API_URL, False)
+    headers = {
+        "content-type": "application/json",
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+    }
+    if fallback:
+        headers["anthropic-beta"] = FALLBACK_BETA
+    for k, v in headers.items():
+        xhr.setRequestHeader(k, v)
+    xhr.send(json.dumps(body))
+    if xhr.status != 200:
+        raise RuntimeError(f"API {xhr.status} : {str(xhr.responseText)[:300]}")
+    return json.loads(xhr.responseText)
+
+
+def _call(body: dict, api_key: str, fallback: bool) -> tuple[str | None, list[str]]:
+    if sys.platform == "emscripten":
+        data = _post_from_browser(body, api_key, fallback)
+        return data.get("stop_reason"), [b["text"] for b in data.get("content", []) if b.get("type") == "text"]
+    import anthropic  # noqa: PLC0415
+
+    client = anthropic.Anthropic(api_key=api_key)
+    response = client.beta.messages.create(betas=[FALLBACK_BETA], **body) if fallback else client.messages.create(**body)
+    return response.stop_reason, [b.text for b in response.content if b.type == "text"]
+
+
+def analyse_with_claude(dce_text: str, api_key: str) -> Analyse:
+    if len(dce_text) > MAX_CHARS:
+        raise ValueError(f"Dossier trop volumineux ({len(dce_text):,} caractères) : analyser les pièces séparément.")
+    body = _request(dce_text)
+    try:
+        stop_reason, texts = _call(body, api_key, fallback=True)
+    except Exception as e:
+        if "fallback" not in str(e).lower():
+            raise
+        # Compte non éligible aux modèles de repli : on relance sans.
+        body.pop("fallbacks")
+        stop_reason, texts = _call(body, api_key, fallback=False)
+    if stop_reason == "refusal":
         raise RuntimeError("Le modèle a refusé la requête.")
-    text = next(b.text for b in response.content if b.type == "text")
-    return Analyse.model_validate(json.loads(text))
+    if stop_reason == "max_tokens":
+        raise RuntimeError("Réponse tronquée (limite de longueur atteinte).")
+    return Analyse.model_validate(json.loads(texts[0]))
 
 
 def _strict_schema(schema: dict) -> dict:
@@ -114,6 +184,21 @@ def _type_projet(dce: str) -> str:
     if "400 kv" in t or "interconnexion" in t:
         return "Interconnexion / poste 400 kV"
     return "Poste source / extension"
+
+
+def _opportunites(dce: str) -> list[str]:
+    t = dce.lower()
+    ops = []
+    if "extension future" in t or "tranche" in t:
+        ops.append("Extension future prévue : position privilégiée pour la tranche suivante")
+    if "data center" in t:
+        ops.append("Data centers : segment en forte croissance, référence vitrine")
+    if re.search(r"solaire|photovolta|éolien", t):
+        ops.append("Raccordements EnR : marché récurrent, référence réutilisable pour d'autres parcs")
+    if re.search(r"\bais\b|isolé dans l.air", t):
+        ops.append("Variante GIS (poste sous enveloppe métallique) : emprise réduite, argument technique")
+    ops.append("Achats groupés câbles et appareillage avec les autres affaires en cours")
+    return ops
 
 
 def analyse_offline(dce: str) -> Analyse:
@@ -210,14 +295,16 @@ def analyse_offline(dce: str) -> Analyse:
         tension_kv=kv, nb_travees=travees, puissance_mva=mva_total, km_cable=km, pays="France",
         delai_exige_mois=delai, risques=risques, donnees_manquantes=manquantes,
         hypotheses_proposees=hyp, exclusions_proposees=excl, questions_au_client=questions,
+        opportunites=_opportunites(dce),
         recommandation_go_nogo=reco)
 
 
-def analyse(dce_text: str) -> tuple[Analyse, str]:
-    """Retourne (analyse, mode). Bascule en hors-ligne si Claude n'est pas disponible."""
-    if os.environ.get("ANTHROPIC_API_KEY"):
+def analyse(dce_text: str, api_key: str | None = None) -> tuple[Analyse, str]:
+    """Retourne (analyse, mode). Sans clé, ou si l'API échoue, bascule sur le mode hors-ligne."""
+    key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+    if key:
         try:
-            return analyse_with_claude(dce_text), "Claude"
+            return analyse_with_claude(dce_text, key), "IA (Claude)"
         except Exception as e:  # démo : on ne bloque jamais
-            return analyse_offline(dce_text), f"hors-ligne (erreur API : {type(e).__name__})"
-    return analyse_offline(dce_text), "hors-ligne (règles)"
+            return analyse_offline(dce_text), f"hors-ligne – l'appel à l'IA a échoué ({type(e).__name__} : {str(e)[:200]})"
+    return analyse_offline(dce_text), "hors-ligne (règles) – ajoutez une clé API pour analyser n'importe quel dossier"
