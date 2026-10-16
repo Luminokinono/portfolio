@@ -325,7 +325,7 @@ function setTime(t) {
       const bolt = document.getElementById("bolt"), L = 520;
       bolt.style.strokeDasharray = L; bolt.style.strokeDashoffset = L * (1 - easeInOut(lt / 0.9));
       bolt.style.fill = `rgba(25,195,255,${0.9 * clamp((lt - 0.8) / 0.5)})`;
-      bolt.style.filter = `drop-shadow(0 0 ${30 * clamp((lt - 0.8) / 0.5)}px #19c3ff)`;
+      bolt.parentNode.style.filter = `drop-shadow(0 0 ${30 * clamp((lt - 0.8) / 0.5)}px #19c3ff)`;
     }
     if (id === "s4") {
       const bar = document.getElementById("scanbar"), sp = ((lt - 0.8) / 1.6);

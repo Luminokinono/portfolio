@@ -301,4 +301,17 @@ $$('[data-magnetic]').forEach(el=>{
   el.addEventListener('pointermove',e=>{const b=el.getBoundingClientRect();el.style.translate=`${(e.clientX-b.left-b.width/2)*.3}px ${(e.clientY-b.top-b.height/2)*.35}px`});
   el.addEventListener('pointerleave',()=>el.style.translate='');
 });
+
+// ---------- Vidéo de présentation (fenêtre modale) ----------
+const vModal=$('#video-modal');
+if(vModal){
+  const vid=vModal.querySelector('video');
+  $$('[data-video]').forEach(btn=>btn.addEventListener('click',()=>{
+    if(vid.getAttribute('src')!==btn.dataset.video)vid.src=btn.dataset.video;
+    vModal.showModal();vid.currentTime=0;vid.play().catch(()=>{});
+  }));
+  vModal.querySelector('.video-close').addEventListener('click',()=>vModal.close());
+  vModal.addEventListener('click',e=>{if(e.target===vModal)vModal.close()});
+  vModal.addEventListener('close',()=>vid.pause());
+}
 })();
