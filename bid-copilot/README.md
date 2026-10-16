@@ -48,3 +48,11 @@ export ANTHROPIC_API_KEY=sk-ant-...
 - **Confidentialité** : des offres à plusieurs dizaines de M€ imposent un LLM hébergé en Europe ou en interne, une traçabilité des sources, et une validation humaine systématique.
 - **Similarité** : passer du k plus proches voisins sur les caractéristiques à une recherche sémantique (embeddings) dans les mémoires techniques et les retours d'expérience.
 - **Calibration** : ajuster les lois du Monte Carlo à partir des écarts réels entre coûts prévus et coûts constatés.
+
+## Version en ligne (sans serveur)
+
+`index.html` fait tourner l'appli directement dans le navigateur grâce à [stlite](https://github.com/whitphx/stlite) (Streamlit compilé en WebAssembly). Une fois la branche fusionnée dans `main`, elle est accessible via GitHub Pages à l'adresse :
+
+https://luminokinono.github.io/portfolio/bid-copilot/
+
+Dans cette version, l'analyse du DCE tourne en mode hors-ligne (règles). Le premier chargement prend 30 à 60 secondes.
