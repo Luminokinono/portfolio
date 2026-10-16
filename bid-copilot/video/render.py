@@ -3,10 +3,10 @@ import subprocess, sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
-HTML = Path(__file__).resolve().parent / "promo.html"
+HTML = Path(__file__).resolve().parent / (sys.argv[4] if len(sys.argv) > 4 else "promo.html")
 OUT = Path(sys.argv[1])
 FPS = int(sys.argv[2]) if len(sys.argv) > 2 else 30
-STILLS = [float(x) for x in sys.argv[3].split(",")] if len(sys.argv) > 3 else None
+STILLS = [float(x) for x in sys.argv[3].split(",")] if len(sys.argv) > 3 and sys.argv[3] else None
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1194/chrome-linux/chrome", args=["--no-sandbox"])
