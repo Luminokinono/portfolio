@@ -15,7 +15,9 @@ Démonstrateur d'outil d'aide à la préparation d'offres pour des projets élec
 | Assistant d'appel d'offres | Extraction structurée du dossier : caractéristiques, risques cités, données manquantes, hypothèses, exclusions, questions au client, recommandation go / no-go | `core/ai_analyst.py` |
 | Comité de Risque | Présentation de 8 slides : Projet → Chiffres clés → Planning → Risques → Opportunités → Hypothèses → Synthèse financière → Décisions attendues | `core/risk_deck.py` |
 
-L'analyse IA utilise l'API Claude si la variable `ANTHROPIC_API_KEY` est définie. Sinon, elle bascule sur un **mode hors-ligne à base de règles**, pour que la démo fonctionne toujours, même sans réseau.
+**Deux modes d'analyse :**
+- **IA (Claude)** : il suffit de saisir une clé API dans l'onglet 1 (ou de définir `ANTHROPIC_API_KEY`). L'IA lit le dossier, quel qu'il soit, et en tire une analyse structurée. On peut déposer plusieurs pièces à la fois (RC, CCAP, CCTP). Dans la version navigateur, l'appel part directement du navigateur et la clé n'est pas stockée.
+- **Hors-ligne (règles)** : sans clé, ou si l'appel échoue, des règles par mots-clés prennent le relais. Elles ne reconnaissent que les clauses prévues, mais la démo fonctionne toujours, même sans réseau.
 
 ## Lancer la démo
 
@@ -55,4 +57,4 @@ export ANTHROPIC_API_KEY=sk-ant-...
 
 https://luminokinono.github.io/portfolio/bid-copilot/
 
-Dans cette version, l'analyse du DCE tourne en mode hors-ligne (règles). Le premier chargement prend 30 à 60 secondes.
+Sans clé API, l'analyse du DCE tourne en mode hors-ligne (règles). Le premier chargement prend 30 à 60 secondes.
