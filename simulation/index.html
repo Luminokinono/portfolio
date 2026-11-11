@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Simulation éléments finis – Oumid Bilal</title>
+<meta name="description" content="Deux études par éléments finis menées à l'ECAM-EPMI : tenue mécanique et modes propres d'une citerne en aluminium, dimensionnement thermique d'un radiateur de microprocesseur." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --ink:#07060b;--ink-2:#100d18;--paper:#f3f0ff;--dim:#8e88a8;--violet:#c359d6;--blue:#4f7dff;--line:#f3f0ff1a;
+  --display:'Oswald','Arial Narrow',Impact,sans-serif;--body:'Manrope','Segoe UI',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --gutter:clamp(16px,4vw,56px);color-scheme:dark;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:var(--ink);scroll-behavior:smooth}
+body{background:var(--ink);color:var(--paper);font-family:var(--body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.eyebrow{color:var(--violet);display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:'';width:28px;height:1px;background:currentColor}
+::selection{background:var(--violet);color:var(--ink)}
+:focus-visible{outline:2px solid var(--violet);outline-offset:4px;border-radius:4px}
+
+.top{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:18px var(--gutter);background:linear-gradient(var(--ink) 60%,#07060b00)}
+.top a{text-decoration:none;color:var(--dim);transition:color .3s}
+.top a:hover{color:var(--paper)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 var(--gutter)}
+.hero{padding:clamp(40px,8vh,96px) 0 clamp(32px,6vh,72px);display:grid;gap:24px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(2.8rem,8vw,6.6rem);line-height:.92;text-transform:uppercase;text-wrap:balance}
+h1 em{font-style:normal;color:var(--violet)}
+.lead{max-width:62ch;color:var(--dim);font-size:1.08rem}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--dim)}
+
+section.study{border-top:1px solid var(--line);padding:clamp(48px,9vh,110px) 0}
+.study-head{display:grid;grid-template-columns:auto 1fr;gap:8px 24px;align-items:baseline;margin-bottom:clamp(28px,5vh,56px)}
+.study-n{font-family:var(--display);font-weight:200;font-size:clamp(3rem,7vw,5.5rem);line-height:1;color:var(--violet)}
+h2{font-family:var(--display);font-weight:500;font-size:clamp(1.8rem,4vw,3rem);line-height:1.05;text-transform:uppercase}
+.study-head p{grid-column:2;color:var(--dim)}
+h3{font-family:var(--display);font-weight:500;font-size:1.25rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px}
+
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,4vw,56px);align-items:center}
+.panel{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.panel figcaption{padding:12px 16px;color:var(--dim);border-top:1px solid var(--line)}
+.facts{display:grid;gap:22px}
+.facts ul{list-style:none;display:grid;gap:8px;color:var(--dim)}
+.facts li{padding-left:18px;position:relative}
+.facts li::before{content:'';position:absolute;left:0;top:.75em;width:8px;height:1px;background:var(--violet)}
+.facts strong{color:var(--paper);font-weight:500}
+
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,24px);margin-top:clamp(28px,5vh,56px)}
+.modes .hz{font-family:var(--display);font-size:1.6rem;color:var(--paper);letter-spacing:.02em}
+.modes figcaption{display:grid;gap:2px}
+.callout{margin-top:clamp(24px,4vh,40px);border-left:2px solid var(--violet);padding:4px 0 4px 20px;max-width:75ch;color:var(--dim)}
+.callout strong{color:var(--paper);font-weight:500}
+
+.steps{display:grid;gap:clamp(14px,2.5vh,24px);margin-top:8px}
+.step{display:grid;grid-template-columns:200px 1fr;gap:clamp(14px,3vw,36px);align-items:center}
+.step .panel img{width:100%}
+.step-label{display:grid;gap:4px}
+.step-label .mono{color:var(--violet)}
+.step-label p{color:var(--dim);font-size:.95rem}
+.scale{display:flex;align-items:center;gap:12px;margin-top:20px;color:var(--dim)}
+.scale i{flex:0 0 160px;height:8px;border-radius:4px;background:linear-gradient(90deg,#30123b,#4686fb,#1be5b5,#a4fc3c,#fbb938,#e4460a,#7a0403)}
+
+.takeaways{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,24px)}
+.takeaways article{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:22px}
+.takeaways p{color:var(--dim)}
+footer{border-top:1px solid var(--line);padding:32px 0 48px;color:var(--dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px}
+
+@media (max-width:860px){
+  .split{grid-template-columns:1fr}
+  .modes{grid-template-columns:1fr 1fr}
+  .step{grid-template-columns:1fr}
+  .takeaways{grid-template-columns:1fr}
+  .study-head{grid-template-columns:1fr}
+  .study-head p{grid-column:1}
+}
+@media (max-width:480px){.modes{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a href="../#work" class="mono">← Portfolio</a>
+  <span class="mono" style="color:var(--dim)">ECAM-EPMI · 2026</span>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <p class="eyebrow mono">Projet 06 · Modélisation</p>
+    <h1>Simulation par <em>éléments finis</em></h1>
+    <p class="lead">Deux études menées en travaux pratiques à l'ECAM-EPMI : vérifier qu'une citerne en aluminium résiste à sa pression de service, puis dimensionner le radiateur d'un microprocesseur pour qu'il reste sous 85 °C. Dans les deux cas, la démarche est la même : poser les hypothèses, construire le modèle, l'exploiter, puis décider.</p>
+    <div class="tags mono"><span>GeoStar · COSMOS/M</span><span>Statique</span><span>Analyse modale</span><span>Thermique</span><span>Optimisation</span></div>
+  </div>
+
+  <!-- CITERNE -->
+  <section class="study" aria-labelledby="t-citerne">
+    <div class="wrap">
+      <div class="study-head">
+        <span class="study-n">A</span>
+        <h2 id="t-citerne">Citerne aluminium sous pression</h2>
+        <p>Une cuve de 1000 × 500 × 500 mm, soudée sur un véhicule industriel par deux pattes, soumise à 0,25 bar de pression interne.</p>
+      </div>
+
+      <div class="split">
+        <figure class="panel">
+          <img src="img/citerne-statique.jpg" alt="Maillage de la citerne coloré selon la contrainte : le maximum se situe au centre du fond plat" width="1100" height="1100" loading="lazy" />
+          <figcaption class="mono">Statique · zone critique au centre des fonds plats</figcaption>
+        </figure>
+        <div class="facts">
+          <div>
+            <h3>Le besoin</h3>
+            <p style="color:var(--dim)">Vérifier la tenue de la cuve : la contrainte de Von Mises doit rester sous la limite élastique de l'aluminium (135 MPa).</p>
+          </div>
+          <div>
+            <h3>Le modèle</h3>
+            <ul>
+              <li><strong>Coque 3D</strong> de 6 mm d'épaisseur, contraintes planes, petites déformations</li>
+              <li><strong>Maillage</strong> en éléments de 50 mm</li>
+              <li><strong>Encastrement</strong> des semelles des pattes, là où elles sont soudées au châssis</li>
+              <li><strong>Matériau</strong> : E = 75 000 MPa, ν = 0,33, ρ = 2,7 kg/dm³</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Ce que montre le calcul</h3>
+            <p style="color:var(--dim)">Les parois cintrées travaillent peu : la pression est reprise en membrane. Ce sont les <strong style="color:var(--paper);font-weight:500">fonds plats</strong> qui fléchissent et concentrent la contrainte. C'est donc là que se joue la tenue de la cuve, et c'est là qu'il faudrait renforcer pour monter en pression.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modes">
+        <figure class="panel">
+          <img src="img/citerne-mode1.jpg" alt="Mode propre 1 : la cuve entière oscille sur ses pattes" width="640" height="640" loading="lazy" />
+          <figcaption><span class="mono" style="color:var(--violet)">Mode 1</span><span class="hz">23,9 Hz</span><span style="color:var(--dim)">La cuve entière balance sur ses pattes.</span></figcaption>
+        </figure>
+        <figure class="panel">
+          <img src="img/citerne-mode2.jpg" alt="Modes propres 2 et 3 : les fonds plats se bombent" width="640" height="640" loading="lazy" />
+          <figcaption><span class="mono" style="color:var(--violet)">Modes 2 et 3</span><span class="hz">118,9 · 126,3 Hz</span><span style="color:var(--dim)">Les fonds plats se bombent.</span></figcaption>
+        </figure>
+        <figure class="panel">
+          <img src="img/citerne-mode4.jpg" alt="Mode propre 4 : lobes de flexion sur la virole" width="640" height="640" loading="lazy" />
+          <figcaption><span class="mono" style="color:var(--violet)">Mode 4</span><span class="hz">223,0 Hz</span><span style="color:var(--dim)">La virole ondule en lobes.</span></figcaption>
+        </figure>
+      </div>
+
+      <p class="callout"><strong>Pourquoi les modes comptent.</strong> Le premier mode, à 23,9 Hz, est très bas. Si le véhicule vibre à cette fréquence, la cuve entre en résonance : les amplitudes s'amplifient et les soudures des pattes travaillent en fatigue. Le calcul statique seul ne le montrerait pas.</p>
+    </div>
+  </section>
+
+  <!-- RADIATEUR -->
+  <section class="study" aria-labelledby="t-radiateur">
+    <div class="wrap">
+      <div class="study-head">
+        <span class="study-n">B</span>
+        <h2 id="t-radiateur">Refroidissement d'un microprocesseur</h2>
+        <p>Dissiper 1,2 W produits par une puce de 50 × 15 × 3 mm sans dépasser 85 °C, avec une ambiance à 20 °C.</p>
+      </div>
+
+      <div class="split" style="align-items:start">
+        <div class="facts">
+          <div>
+            <h3>Le modèle</h3>
+            <ul>
+              <li><strong>Équation de la chaleur</strong> en régime permanent, avec source volumique, résolue en 2D (plan xOy)</li>
+              <li><strong>Source</strong> : 1,2 W répartis dans le volume de la puce</li>
+              <li><strong>Convection</strong> : 20 W/m²K en naturel, jusqu'à 2000 W/m²K avec ventilateur</li>
+              <li><strong>Contact parfait</strong> entre la puce et le radiateur</li>
+            </ul>
+          </div>
+          <div>
+            <h3>La démarche</h3>
+            <ul>
+              <li>Puce seule, pour mesurer le problème</li>
+              <li>Vérification de la sensibilité au maillage (éléments 2 fois plus gros)</li>
+              <li>Ajout du radiateur, puis du ventilateur entre les ailettes centrales</li>
+              <li>Optimisation du nombre et de la hauteur des ailettes pour <strong>gagner du poids</strong> sous la contrainte des 85 °C</li>
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-label"><span class="mono">01 · Puce seule</span><p>La chaleur reste piégée au cœur de la puce.</p></div>
+              <figure class="panel"><img src="img/processeur-seul.jpg" alt="Champ de température de la puce seule, chaude au centre" width="1400" height="150" loading="lazy" /></figure>
+            </div>
+            <div class="step">
+              <div class="step-label"><span class="mono">02 · Radiateur</span><p>Les ailettes évacuent la chaleur vers l'air.</p></div>
+              <figure class="panel"><img src="img/radiateur.jpg" alt="Champ de température avec radiateur à six ailettes" width="1400" height="443" loading="lazy" /></figure>
+            </div>
+            <div class="step">
+              <div class="step-label"><span class="mono">03 · Ventilateur</span><p>Le flux forcé entre les ailettes centrales refroidit le cœur.</p></div>
+              <figure class="panel"><img src="img/radiateur-ventilo.jpg" alt="Champ de température avec ventilateur entre les ailettes centrales, zone centrale refroidie" width="1400" height="443" loading="lazy" /></figure>
+            </div>
+          </div>
+          <div class="scale mono"><span>Froid</span><i></i><span>Chaud</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RETENU -->
+  <section class="study" aria-labelledby="t-retenu">
+    <div class="wrap">
+      <div class="study-head">
+        <span class="study-n">→</span>
+        <h2 id="t-retenu">Ce que j'en retiens</h2>
+      </div>
+      <div class="takeaways">
+        <article><h3>Simplifier sans trahir</h3><p>Symétries, 2D plutôt que 3D, contact parfait : chaque hypothèse fait gagner du temps de calcul, mais il faut savoir ce qu'elle coûte en précision.</p></article>
+        <article><h3>Douter du résultat</h3><p>Un calcul n'est fiable qu'une fois le maillage vérifié. Changer la taille des éléments et comparer, c'est le premier réflexe.</p></article>
+        <article><h3>Décider sous contrainte</h3><p>L'objectif n'est pas le meilleur chiffre, mais la solution la plus légère qui respecte la limite : 135 MPa pour la cuve, 85 °C pour la puce.</p></article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap mono">
+    <span>Visuels recréés à partir de mes modèles GeoStar</span>
+    <a href="../#work">← Retour aux projets</a>
+  </div>
+</footer>
+</body>
+</html>
